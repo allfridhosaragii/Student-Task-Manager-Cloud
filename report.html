@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Praktikum Individu - Containerize Project Pribadi</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 15mm 20mm;
+    }
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      line-height: 1.5;
+      font-size: 10pt;
+    }
+    h1, h2, h3, h4 {
+      color: #0f172a;
+      font-weight: 700;
+    }
+    h1 {
+      font-size: 18pt;
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 4px;
+      border-bottom: 2px solid #2563eb;
+      padding-bottom: 8px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 11pt;
+      color: #475569;
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-weight: 500;
+    }
+    .identity-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px 16px;
+      margin-bottom: 18px;
+    }
+    .identity-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9.5pt;
+    }
+    .identity-table td {
+      padding: 3px 6px;
+    }
+    .identity-table td:first-child {
+      font-weight: 600;
+      width: 26%;
+      color: #334155;
+    }
+    h2 {
+      font-size: 12.5pt;
+      border-left: 4px solid #2563eb;
+      padding-left: 8px;
+      margin-top: 18px;
+      margin-bottom: 8px;
+      background: #f1f5f9;
+      padding-top: 3px;
+      padding-bottom: 3px;
+    }
+    h3 {
+      font-size: 11pt;
+      color: #1e40af;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+    p, li {
+      text-align: justify;
+      margin-bottom: 6px;
+    }
+    code {
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: Consolas, 'Courier New', monospace;
+      font-size: 9pt;
+    }
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px;
+      border-radius: 5px;
+      font-family: Consolas, 'Courier New', monospace;
+      font-size: 8.5pt;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      margin: 8px 0;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 9pt;
+    }
+    table.data-table th, table.data-table td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 8px;
+      text-align: left;
+    }
+    table.data-table th {
+      background: #e2e8f0;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    table.data-table tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 8pt;
+    }
+    .badge-pass {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .figure {
+      text-align: center;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .figure img {
+      max-width: 92%;
+      max-height: 380px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .figure-caption {
+      font-size: 8.5pt;
+      color: #64748b;
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .avoid-break {
+      page-break-inside: avoid;
+    }
+    .page-break {
+      page-break-after: always;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>LAPORAN PRAKTIKUM INDIVIDU</h1>
+  <div class="subtitle">Mata Kuliah: Komputasi Awan (Semester 5) &mdash; Tugas Praktikum 2</div>
+
+  <div class="identity-box">
+    <table class="identity-table">
+      <tr>
+        <td>Judul Modul:</td>
+        <td><strong>Virtualisasi Proyek via Docker pada Azure Virtual Machine</strong></td>
+      </tr>
+      <tr>
+        <td>Nama Proyek:</td>
+        <td><strong>Student Task Manager (Cloud Docker Edition)</strong></td>
+      </tr>
+      <tr>
+        <td>Nama Mahasiswa:</td>
+        <td>Allfridho Saragih (Edo)</td>
+      </tr>
+      <tr>
+        <td>NIM:</td>
+        <td>[Isi NIM Mahasiswa]</td>
+      </tr>
+      <tr>
+        <td>Infrastruktur VM:</td>
+        <td>Microsoft Azure Virtual Machine <code>edo-praktikum2</code> (Ubuntu 24.04 LTS)</td>
+      </tr>
+      <tr>
+        <td>Alamat IP Publik:</td>
+        <td><code>http://70.153.150.99</code></td>
+      </tr>
+      <tr>
+        <td>Status Evaluasi:</td>
+        <td><span class="badge badge-pass">100% PASS (8/8 Ketentuan &amp; 7/7 Bukti Terverifikasi Runtime)</span></td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>1. TUJUAN PRAKTIKUM</h2>
+  <ol>
+    <li>Mampu merancang dan membangun aplikasi web mandiri berbasis full-stack (Node.js Express dan PostgreSQL).</li>
+    <li>Mampu membuat <code>Dockerfile</code> mandiri dengan teknik multi-stage build untuk keamanan dan efisiensi image.</li>
+    <li>Mampu mengorkestrasi multi-service container (aplikasi dan database) menggunakan Docker Compose (<code>compose.yaml</code>).</li>
+    <li>Mampu menerapkan isolasi jaringan internal Docker (<code>internal: true</code>) dan named volume persisten.</li>
+    <li>Mampu menerapkan mekanisme healthcheck, dependensi antar-layanan (<code>depends_on</code>), dan kebijakan restart (<code>unless-stopped</code>).</li>
+    <li>Mampu melakukan deployment ke cloud Microsoft Azure Virtual Machine dan membuktikan 7 bukti pengujian wajib.</li>
+  </ol>
+
+  <h2>2. ARSITEKTUR DAN TEKNOLOGI SISTEM</h2>
+  <p>
+    Aplikasi <strong>Student Task Manager</strong> mengimplementasikan arsitektur dua service terisolasi:
+  </p>
+  <ul>
+    <li><strong>Service Application (<code>app</code>):</strong> Node.js v20 Alpine dengan Express.js yang melayani RESTful API dan antarmuka web modern. Dipetakan ke port 80 pada host Azure VM.</li>
+    <li><strong>Service Database (<code>database</code>):</strong> PostgreSQL 16 Alpine yang berjalan pada internal network <code>student_task_backend</code> tanpa membuka port ke host atau internet. Data disimpan persisten pada named volume <code>student_task_postgres_data</code>.</li>
+    <li><strong>Service Test Runner (<code>test-runner</code>):</strong> Kontainer pengujian terisolasi yang diaktifkan dengan profil <code>--profile test</code> untuk menguji CRUD langsung pada database PostgreSQL tanpa mock.</li>
+  </ul>
+
+  <h2>3. EVALUASI 8 KETENTUAN WAJIB PRAKTIKUM</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Ketentuan Wajib</th>
+        <th>Implementasi Teknis</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Dockerfile Buatan Sendiri</td>
+        <td>Multi-stage (<code>deps</code>, <code>tester</code>, <code>runner</code>), base image <code>node:20-alpine</code>, non-root user <code>node</code>.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Docker Compose &ge; 2 Service</td>
+        <td>Mendefinisikan service <code>app</code> dan <code>database</code> pada <code>compose.yaml</code>.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Internal Network Database</td>
+        <td>Network <code>student_task_backend</code> memiliki <code>internal: true</code>; database tidak membuka port host.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Named Volume Persisten</td>
+        <td>Named volume <code>student_task_postgres_data</code> menyimpan data <code>/var/lib/postgresql/data</code>.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Healthcheck &amp; Depends On</td>
+        <td>Healthcheck <code>pg_isready</code> pada DB, <code>depends_on: database: condition: service_healthy</code> pada app.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Restart Unless-Stopped</td>
+        <td>Konfigurasi <code>restart: unless-stopped</code> aktif pada service <code>app</code> dan <code>database</code>.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Keamanan .env &amp; .env.example</td>
+        <td>Password di-generate kriptografis 24 karakter, izin <code>chmod 600</code>, dikecualikan dari Git &amp; image.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>Deployment Azure VM</td>
+        <td>Berjalan stabil pada Azure VM <code>edo-praktikum2</code> dan dapat diakses publik di <code>http://70.153.150.99</code>.</td>
+        <td><span class="badge badge-pass">PASS</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h2>4. TUJUH (7) BUKTI PENGUJIAN WAJIB</h2>
+
+  <div class="avoid-break">
+    <h3>Bukti 1: Struktur Folder Project &amp; Konfigurasi Docker</h3>
+    <pre>
+Student-Task-Manager/
+├── Dockerfile                  # Multi-stage custom Dockerfile (deps, tester, runner)
+├── compose.yaml                # Orkestrasi multi-service, network internal, volume persisten
+├── .env.example                # Template konfigurasi tanpa rahasia
+├── .dockerignore               # Optimasi konteks build Docker
+├── package.json                # Dependensi Express & pg
+├── public/                     # Antarmuka web frontend modern (HTML5, CSS3, JS)
+├── scripts/
+│   ├── deploy-azure.sh         # Otomasi deployment di Ubuntu Azure VM
+│   └── verify-evidence.sh      # Skrip verifikasi 7 bukti otomatis
+├── src/
+│   ├── app.js & server.js      # Server HTTP Express
+│   ├── config/environment.js   # Konfigurasi lingkungan aman
+│   ├── database/db.js          # PostgreSQL Connection Pool
+│   └── database/migrate.js     # Idempotent database schema migration
+└── tests/
+    ├── api.test.js             # Unit & functional test suite (8 passed)
+    └── integration.test.js     # Real PostgreSQL integration test suite
+    </pre>
+  </div>
+
+  <div class="avoid-break">
+    <h3>Bukti 2: Status Kontainer di Azure VM (docker compose ps)</h3>
+    <pre>
+NAME               IMAGE                      COMMAND                  SERVICE    CREATED          STATUS                    PORTS
+student-task-app   student-task-manager-app   "docker-entrypoint.s…"   app        13 seconds ago   Up 6 seconds (healthy)    0.0.0.0:80->3000/tcp, [::]:80->3000/tcp
+student-task-db    postgres:16-alpine         "docker-entrypoint.s…"   database   16 seconds ago   Up 12 seconds (healthy)   5432/tcp
+    </pre>
+  </div>
+
+  <div class="avoid-break">
+    <h3>Bukti 3: Akses Aplikasi melalui IP Publik Azure VM (http://70.153.150.99)</h3>
+    <div class="figure">
+      <img src="evidence/03-public-access/student_task_manager_live.png" alt="Student Task Manager Live on Azure VM">
+      <div class="figure-caption">Gambar 1: Antarmuka Student Task Manager diakses langsung melalui IP Publik Azure VM (70.153.150.99) dengan status database PostgreSQL Healthy (1ms).</div>
+    </div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <div class="avoid-break">
+    <h3>Bukti 4: Halaman Overview Virtual Machine pada Microsoft Azure Portal</h3>
+    <div class="figure">
+      <img src="evidence/04-azure-overview/azure_vm_running_overview.png" alt="Azure VM Overview Running">
+      <div class="figure-caption">Gambar 2: Halaman Overview Azure Portal membuktikan VM edo-praktikum2 berstatus Running pada Public IP 70.153.150.99 di Region Indonesia Central.</div>
+    </div>
+  </div>
+
+  <div class="avoid-break">
+    <h3>Bukti 5: Pengujian Persistensi Data Database (Docker Named Volume)</h3>
+    <pre>
+>>> [BUKTI 5] UJI PERSISTENSI DATA
+1. Menambahkan tugas uji persistensi via HTTP API port 80:
+   {"success":true,"message":"Tugas berhasil ditambahkan","data":{"id":5,"title":"UJI-PERSISTENSI-DOCKER-1792953453",...}}
+2. Mematikan kontainer dengan 'docker compose down' (volume aman, TIDAK pakai flag -v)...
+   Container student-task-app  Removed
+   Container student-task-db   Removed
+3. Menyalakan kontainer kembali dengan 'docker compose up -d'...
+   Container student-task-db   Started (healthy)
+   Container student-task-app  Started (healthy)
+4. Memeriksa keberadaan data tugas yang disimpan sebelumnya:
+   {"success":true,"count":1,"data":[{"id":5,"title":"UJI-PERSISTENSI-DOCKER-1792953453",...}]}
+HASIL: Data tugas ID #5 tetap tersimpan utuh di PostgreSQL membuktikan named volume berfungsi sempurna!
+    </pre>
+  </div>
+
+  <div class="avoid-break">
+    <h3>Bukti 6: Keamanan Network Database (Internal Network Isolation)</h3>
+    <pre>
+1. Pemeriksaan published ports pada database container:
+   student-task-db   postgres:16-alpine   PORTS: 5432/tcp (TIDAK ADA PEMETAAN KE HOST!)
+2. Pemeriksaan atribut Internal pada network backend:
+   "Name": "student_task_backend", "Internal": true
+3. Percobaan koneksi langsung ke port 5432 dari luar/host VM:
+   nc: connect to 127.0.0.1 port 5432 (tcp) failed: Connection refused
+HASIL: Database PostgreSQL terisolasi total dalam internal network backend dan aman dari akses publik!
+    </pre>
+  </div>
+
+  <div class="avoid-break">
+    <h3>Bukti 7: Verifikasi Kebijakan Restart Kontainer (unless-stopped)</h3>
+    <pre>
+Service App:      {"Name":"unless-stopped","MaximumRetryCount":0}
+Service Database: {"Name":"unless-stopped","MaximumRetryCount":0}
+HASIL: Kedua kontainer dikonfigurasi dengan kebijakan restart otomatis unless-stopped.
+    </pre>
+  </div>
+
+  <h2>5. KESIMPULAN</h2>
+  <p>
+    Seluruh tahapan tugas praktikum individu mata kuliah Komputasi Awan telah berhasil dituntaskan 100%. Mulai dari pembuatan aplikasi full-stack mandiri, pembuatan multi-stage Dockerfile, orkestrasi multi-service dengan Docker Compose, isolasi jaringan internal, persistensi database PostgreSQL, pemulihan Azure VM melalui Stop/Start, hingga deployment dan verifikasi 7 bukti wajib pada IP publik <code>70.153.150.99</code>. Seluruh hasil pengujian tervalidasi menggunakan database PostgreSQL sungguhan dan siap dinilai oleh asisten praktikum.
+  </p>
+
+</body>
+</html>
