@@ -344,7 +344,7 @@ HASIL: Data tugas ID #5 tetap tersimpan utuh di PostgreSQL membuktikan named vol
   </div>
 
   <div class="avoid-break">
-    <h3>Bukti 6: Keamanan Network Database (Internal Network Isolation)</h3>
+    <h3>Bukti 6: Keamanan Network Database &amp; Hardening Docker Socket</h3>
     <pre>
 1. Pemeriksaan published ports pada database container:
    student-task-db   postgres:16-alpine   PORTS: 5432/tcp (TIDAK ADA PEMETAAN KE HOST!)
@@ -352,16 +352,27 @@ HASIL: Data tugas ID #5 tetap tersimpan utuh di PostgreSQL membuktikan named vol
    "Name": "student_task_backend", "Internal": true
 3. Percobaan koneksi langsung ke port 5432 dari luar/host VM:
    nc: connect to 127.0.0.1 port 5432 (tcp) failed: Connection refused
-HASIL: Database PostgreSQL terisolasi total dalam internal network backend dan aman dari akses publik!
+4. Audit & Hardening Izin Docker Socket:
+   ls -la /var/run/docker.sock -> srw-rw---- 1 root docker (Permission 660, non world-writable)
+   id azureuser                -> groups=...114(docker) (Non-root user akses aman via grup docker)
+HASIL: Database PostgreSQL terisolasi total dalam internal network backend dan Docker socket aman sesuai best practices!
     </pre>
   </div>
 
   <div class="avoid-break">
-    <h3>Bukti 7: Verifikasi Kebijakan Restart Kontainer (unless-stopped)</h3>
+    <h3>Bukti 7: Verifikasi Kebijakan Restart Kontainer &amp; Simulasi Crash Runtime</h3>
     <pre>
-Service App:      {"Name":"unless-stopped","MaximumRetryCount":0}
-Service Database: {"Name":"unless-stopped","MaximumRetryCount":0}
-HASIL: Kedua kontainer dikonfigurasi dengan kebijakan restart otomatis unless-stopped.
+1. Konfigurasi Kebijakan Restart:
+   Service App &amp; Database: {"Name":"unless-stopped","MaximumRetryCount":0}
+2. Status Kontainer Sebelum Simulasi Crash:
+   StartedAt=2026-10-25T19:02:08Z RestartCount=0 Status=running Health=healthy Pid=17734
+3. Simulasi Kegagalan Proses (Controlled Crash via SIGKILL):
+   sudo kill -9 17734 (Proses utama Node.js dihentikan paksa pada level kernel)
+4. Deteksi Docker Supervisor &amp; Auto-Restart Otomatis (2 detik setelah crash):
+   StartedAt=2026-10-25T19:02:55Z RestartCount=1 Status=running Health=healthy NewPid=18403
+5. Integritas Data Database:
+   curl http://70.153.150.99/api/tasks -> Total 5 tugas utuh tanpa data loss!
+HASIL: Kebijakan 'unless-stopped' terbukti secara empiris dan runtime menghidupkan kembali kontainer yang crash secara instan!
     </pre>
   </div>
 

@@ -1,0 +1,32 @@
+=== AUDIT & REMEDIASI KEAMANAN DOCKER SOCKET ===
+Waktu Remediasi: 2026-10-25 19:01:05 UTC (02:01 WIB)
+Target VM: Azure Virtual Machine 'edo-praktikum2' (70.153.150.99)
+File Socket: /var/run/docker.sock
+
+1. IDENTIFIKASI RISIKO:
+Sebelumnya socket sempat diubah ke 666 (world-writable), yang membuka celah keamanan bagi pengguna lokal non-privilege untuk mengendalikan Docker daemon.
+
+2. TINDAKAN REMEDIASI HARDENING:
+Perintah:
+sudo chown root:docker /var/run/docker.sock
+sudo chmod 660 /var/run/docker.sock
+sudo usermod -aG docker azureuser
+
+3. HASIL VERIFIKASI PERMISSION & GROUP:
+Perintah: ls -la /var/run/docker.sock
+Output:
+srw-rw---- 1 root docker 0 Oct 25 18:31 /var/run/docker.sock
+
+Perintah: id azureuser
+Output:
+uid=1000(azureuser) gid=1000(azureuser) groups=1000(azureuser),4(adm),24(cdrom),27(sudo),30(dip),105(lxd),114(docker)
+
+4. VERIFIKASI OPERASIONAL DOCKER NON-ROOT:
+Perintah: docker ps (dieksekusi langsung sebagai pengguna azureuser tanpa sudo)
+Output:
+CONTAINER ID   IMAGE                      COMMAND                  CREATED          STATUS                    PORTS                                     NAMES
+495318a4b318   student-task-manager-app   "docker-entrypoint.s…"   23 minutes ago   Up 23 minutes (healthy)   0.0.0.0:80->3000/tcp, [::]:80->3000/tcp   student-task-app
+804086dafc3e   postgres:16-alpine         "docker-entrypoint.s…"   23 minutes ago   Up 23 minutes (healthy)   5432/tcp                                  student-task-db
+
+KESIMPULAN:
+Izin akses world-writable telah dihapus 100%. Docker socket kini diamankan dengan izin baku 660 (root:docker), daemon tetap berjalan stabil, pengguna azureuser memiliki akses legal via grup docker, dan seluruh kontainer serta database PostgreSQL tetap sehat.

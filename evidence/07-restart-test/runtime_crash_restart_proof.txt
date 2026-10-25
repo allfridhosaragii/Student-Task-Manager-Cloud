@@ -1,0 +1,41 @@
+=== BUKTI 7: PENGUJIAN PERILAKU AUTO-RESTART AKTUAL (RUNTIME CRASH SIMULATION) ===
+Waktu Pengujian: 2026-10-25 19:03:00 UTC (02:03 WIB)
+Target Kontainer: student-task-app (Node.js Express)
+Target VM: Azure Virtual Machine 'edo-praktikum2' (70.153.150.99)
+Kebijakan Restart: restart: unless-stopped
+
+1. STATUS KONTROL SEBELUM SIMULASI CRASH:
+Perintah: docker inspect student-task-app --format 'StartedAt={{.State.StartedAt}} RestartCount={{.RestartCount}} Status={{.State.Status}} Health={{.State.Health.Status}} Pid={{.State.Pid}}'
+Output:
+StartedAt=2026-10-25T19:02:08.082633795Z RestartCount=0 Status=running Health=healthy Pid=17734
+
+2. SIMULASI KEGAGALAN PROSES (CONTROLLED CRASH VIA SIGKILL):
+Perintah: sudo kill -9 17734
+Deskripsi: Menghentikan proses PID 1 aplikasi secara paksa pada level kernel Linux tanpa melalui API 'docker stop' atau 'docker kill'.
+
+3. DETEKSI DOCKER DAEMON & AUTO-RESTART OTOMATIS:
+Perintah: docker inspect student-task-app --format 'StartedAt={{.State.StartedAt}} RestartCount={{.RestartCount}} Status={{.State.Status}} Health={{.State.Health.Status}} NewPid={{.State.Pid}}'
+Output (2 detik setelah crash):
+StartedAt=2026-10-25T19:02:55.257613366Z RestartCount=1 Status=running Health=starting NewPid=18403
+
+ANALISIS RESTART:
+- RestartCount meningkat: 0 -> 1
+- Status kontainer: otomatis kembali running
+- Process ID baru (NewPid): 18403 (menggantikan PID 17734 yang terbunuh)
+- Timestamp StartedAt baru: 19:02:55Z (proses baru di-spawn)
+
+4. VERIFIKASI HEALTHCHECK DAN INTEGRITAS DATA SETELAH RESTART:
+Perintah: docker inspect student-task-app --format 'FINAL RESTART STATUS: Status={{.State.Status}} Health={{.State.Health.Status}} RestartCount={{.RestartCount}} NewPid={{.State.Pid}}'
+Output:
+FINAL RESTART STATUS: Status=running Health=healthy RestartCount=1 NewPid=18403
+
+Perintah: curl -s http://127.0.0.1:80/health
+Output:
+{"status":"OK","timestamp":"2026-10-25T19:03:19.977Z","uptimeSeconds":24,"service":"student-task-manager","environment":"production","database":{"status":"healthy","host":"database","latency":"1ms"}}
+
+Perintah: curl -s http://70.153.150.99/api/tasks
+Output:
+{"success":true,"count":5,"data":[...]}
+
+KESIMPULAN:
+Kebijakan 'restart: unless-stopped' terbukti secara empiris dan runtime menghidupkan kembali kontainer aplikasi yang mengalami crash secara instan, mengembalikan status HEALTHY, dan menjaga seluruh 5 data tugas pada database PostgreSQL tanpa kehilangan data sedikit pun.
