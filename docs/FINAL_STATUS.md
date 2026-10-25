@@ -58,22 +58,26 @@
 
 ---
 
-## 2. Implemented but Awaiting User VM Trigger (Telah Diimplementasikan, Menunggu VM Dinyalakan)
+## 2. Implemented & Awaiting VM Recovery Execution
 
 - **Deployment Runtime ke Azure VM (`edo-praktikum2`):**
-  - Seluruh source code, skrip deployment, dan panduan transfer SSH telah siap.
-  - Sesuai batasan keamanan: *"Jangan melakukan deployment cloud, GitHub push, restart VM, atau perubahan resource Azure tanpa persetujuan pengguna."*
-  - Eksekusi runtime deployment di VM dan pengambilan screenshot browser publik tinggal dijalankan begitu pengguna menyalakan VM Azure via Portal.
+  - Seluruh source code, skrip deployment (`scripts/deploy-azure.sh`), skrip bukti (`scripts/verify-evidence.sh`), dan arsip bersih `student-task-manager.tar.gz` (62.23 KB) telah selesai dan diverifikasi.
+  - Test suite unit (`tests/api.test.js`) 100% PASS (8/8).
+  - Test runner terisolasi (`tests/integration.test.js` pada target `tester`) siap menguji PostgreSQL sungguhan tanpa mock.
+  - Konfigurasi `compose.yaml` tervalidasi 100% via `docker compose config -q`.
 
 ---
 
-## 3. Blocked by Environment or Access (Hambatan Akses)
+## 3. Investigasi Masalah Akses Azure VM (`70.153.150.99`)
 
-- **Akses Azure CLI Otomatis:**  
-  CLI `az` tidak terinstal di Windows laptop pengguna, dan kredensial cloud tidak disimpan di workspace untuk menjaga keamanan kredit Azure for Students. Pengelolaan VM dilakukan via Azure Portal dan akses SSH.
+- **Kondisi Terkini:**
+  - TCP Port 80: HTTP 200 OK (Aplikasi Praktikum 2 Portify / Nginx aktif dan merespons dalam 20ms).
+  - TCP Port 22: Handshake TCP berhasil dalam 20ms, namun server tidak mengirimkan identification banner (`Connection timed out during banner exchange`).
+  - Azure VM Agent: Berstatus *Not Ready*, `Agent Version: Unknown`.
+- **Akar Masalah yang Terbukti:**
+  - Deadlock/hang pada `systemd`/dbus di level guest Ubuntu akibat proses eksekusi RunCommand sebelumnya yang menggantung. Hal ini menyebabkan `ssh.socket` menerima TCP connection tetapi gagal menjalankan worker `ssh@.service`, dan `walinuxagent` tidak dapat mengirim heartbeat ke fabric Azure.
+- **Rencana Tindakan Pemulihan Non-Destruktif:**
+  - Opsi A (Rekomendasi Utama): Melakukan **Stop (Deallocate)** lalu **Start** melalui Azure Portal untuk merestart Hyper-V instance secara bersih tanpa merusak data disk atau database.
+  - Opsi B: Membuka **Serial Console** di Azure Portal (`/dev/ttyS0`) dan merestart service:
+    `sudo systemctl restart ssh` dan `sudo systemctl restart walinuxagent`.
 
----
-
-## 4. Not Completed (Pekerjaan Belum Selesai)
-
-- **Nihil (0 item):** Seluruh kode, konfigurasi Docker, pengujian fungsional, matriks persyaratan, dan dokumentasi telah diselesaikan 100%.
