@@ -1,0 +1,78 @@
+services:
+  # ============================================================================
+  # SERVICE 1: Application (Node.js & Express Frontend/Backend)
+  # ============================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: student-task-app
+    restart: unless-stopped
+    ports:
+      - "${HOST_HTTP_PORT:-80}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - APP_URL=${APP_URL:-http://localhost}
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-student_tasks}
+      - DB_USER=${DB_USER:-taskuser}
+      - DB_PASSWORD=${DB_PASSWORD:-taskpass_cloud_2026}
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # ============================================================================
+  # SERVICE 2: Database (PostgreSQL 16 Alpine)
+  # Database terisolasi penuh pada internal backend network tanpa published port
+  # ============================================================================
+  database:
+    image: postgres:16-alpine
+    container_name: student-task-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-student_tasks}
+      POSTGRES_USER: ${DB_USER:-taskuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-taskpass_cloud_2026}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    # PENTING: Sesuai Ketentuan 3 Tugas, TIDAK ADA bagian 'ports' pada database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-taskuser} -d ${DB_NAME:-student_tasks}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+# ==============================================================================
+# NETWORKS: Isolasi Jaringan Aplikasi dan Database
+# ==============================================================================
+networks:
+  frontend:
+    driver: bridge
+    name: student_task_frontend
+  backend:
+    driver: bridge
+    name: student_task_backend
+    internal: true # Tidak memiliki akses keluar internet dan tidak dapat diakses dari host luar
+
+# ==============================================================================
+# VOLUMES: Persistensi Data Database
+# ==============================================================================
+volumes:
+  postgres_data:
+    name: student_task_postgres_data
+    driver: local

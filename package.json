@@ -1,0 +1,27 @@
+{
+  "name": "student-task-manager",
+  "version": "1.0.0",
+  "description": "Student Task Manager - Cloud Computing Academic Project with Docker & Azure VM",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test tests/*.test.js",
+    "migrate": "node src/database/migrate.js"
+  },
+  "keywords": [
+    "cloud-computing",
+    "docker",
+    "postgresql",
+    "express",
+    "azure"
+  ],
+  "author": "Student",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "pg": "^8.11.5"
+  }
+}
