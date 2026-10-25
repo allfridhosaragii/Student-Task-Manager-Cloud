@@ -10,7 +10,7 @@
 - **Kelas:** Komputasi Awan (Semester 5)
 - **Program Studi:** Rekayasa Perangkat Lunak / Teknik Informatika
 - **Mata Kuliah:** Komputasi Awan (Semester 5)
-- **Tautan Repositori GitHub:** `https://github.com/<username>/Student-Task-Manager-Cloud`
+- **Tautan Repositori GitHub:** https://github.com/allfridhosaragii/Student-Task-Manager-Cloud
 
 ---
 

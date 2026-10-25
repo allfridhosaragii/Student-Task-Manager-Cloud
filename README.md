@@ -2,7 +2,10 @@
 
 > **Tugas Praktikum Individu Mata Kuliah Komputasi Awan (Semester 5)**  
 > **Modul:** *Virtualisasi Proyek via Docker pada Azure Virtual Machine*  
-> **Infrastruktur Target:** Microsoft Azure Virtual Machine (`edo-praktikum2`, Ubuntu 24.04 LTS)
+> **Nama Mahasiswa:** Allfridho Prima Anjaynata Saragi (NIM: 102062400045)  
+> **Infrastruktur Target:** Microsoft Azure Virtual Machine (`edo-praktikum2`, Ubuntu 24.04 LTS)  
+> **GitHub Repository:** https://github.com/allfridhosaragii/Student-Task-Manager-Cloud  
+> **Live Public IP:** http://70.153.150.99
 
 ---
 
