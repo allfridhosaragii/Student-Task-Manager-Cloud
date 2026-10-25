@@ -9,7 +9,6 @@ npm-debug.log
 .gemini
 evidence
 docs
-tests
 *.md
 Dockerfile*
 compose*.yaml
