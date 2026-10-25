@@ -18,7 +18,7 @@
 | **5** | **Healthcheck & Depends_On** | Service `database` memiliki healthcheck `pg_isready`. Service `app` menggunakan `depends_on: database` dengan `condition: service_healthy`. | [compose.yaml](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/compose.yaml#L21-L47) | Pengujian urutan startup kontainer dan deteksi status healthy. | **PASS** | App tertahan hingga database healthy sebelum mulai melayani request. |
 | **6** | **Restart Policy** | Kedua service (`app` dan `database`) dikonfigurasi dengan kebijakan `restart: unless-stopped`. | [compose.yaml](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/compose.yaml#L9-L30) | Inspeksi `compose.yaml` dan `docker inspect` HostConfig.RestartPolicy. | **PASS** | Terverifikasi pada kedua service kontainer. |
 | **7** | **Keamanan Lingkungan (.env)** | Kredensial disimpan dalam `.env`. Template non-rahasia disajikan pada `.env.example`. File `.env` masuk dalam `.gitignore` dan `.dockerignore`. | [.env.example](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/.env.example)<br/>[.gitignore](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/.gitignore) | Git status audit memastikan `.env` tidak ter-staging. | **PASS** | `.env` terisolasi dari Git dan Image. |
-| **8** | **Deployment Azure VM** | Skrip deployment otomatis dan konfigurasi port host `80:3000` disiapkan untuk VM Ubuntu mahasiswa (`edo-praktikum2`). | [scripts/deploy-azure.sh](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/scripts/deploy-azure.sh)<br/>[docs/DEPLOYMENT_GUIDE.md](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/docs/DEPLOYMENT_GUIDE.md) | Prosedur SSH dan pengujian via `http://<IP_PUBLIC_VM>:80`. | **READY FOR VM EXECUTION** | Siap dieksekusi begitu pengguna menyalakan VM Azure. |
+| **8** | **Deployment Azure VM** | Aplikasi berjalan di Azure VM (`edo-praktikum2`, `70.153.150.99`) pada port 80 dan dapat diakses dari browser internet. | [scripts/deploy-azure.sh](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/scripts/deploy-azure.sh)<br/>[evidence/03-public-access/](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/evidence/03-public-access/) | Akses HTTP `http://70.153.150.99:80` dan verifikasi healthcheck. | **PASS** | Terverifikasi live di Azure VM `edo-praktikum2`. |
 
 ---
 
@@ -26,18 +26,18 @@
 
 | No. | Nama Bukti Pengujian | Target Bukti | Panduan & Perintah Pengujian | Status Saat Ini | Rencana Pengambilan Bukti |
 | :---: | :--- | :--- | :--- | :---: | :--- |
-| **1** | **Struktur Project & Konfigurasi** | Folder tree, Dockerfile, compose.yaml | Jalankan `scripts/verify-evidence.sh` atau screenshot editor/terminal. | **PASS (VERIFIED LOKAL)** | Tersedia di `evidence/01-project-structure/` dan source code repositori. |
-| **2** | **Status Container di Azure VM** | Output `docker compose ps` di VM | Eksekusi `docker compose ps` pada terminal SSH VM `edo-praktikum2`. | **READY FOR VM** | Panduan eksekusi siap di `docs/TESTING_GUIDE.md#bukti-2`. |
-| **3** | **Aplikasi via Public IP** | Website terbuka di `http://<IP_PUBLIC_VM>` | Buka browser menuju alamat IP publik VM Azure port 80. | **READY FOR VM** | Panduan eksekusi siap di `docs/TESTING_GUIDE.md#bukti-3`. |
-| **4** | **Halaman Overview Azure** | Screenshot Portal Azure VM | Buka Azure Portal -> VM `edo-praktikum2` (Status Running & Public IP sama). | **READY FOR VM** | Panduan eksekusi siap di `docs/TESTING_GUIDE.md#bukti-4`. |
-| **5** | **Persistensi Data** | Data bertahan setelah `docker compose down` | Input tugas `UJI-PERSISTENSI-DOCKER` -> down -> up -d -> data tetap ada. | **READY FOR VM** | Skrip otomatis tersedia di `scripts/verify-evidence.sh`. |
-| **6** | **Keamanan Network Database** | Port 5432 tidak terbuka ke publik/host | Verifikasi `docker compose ps database` dan inspect network internal. | **READY FOR VM** | Skrip otomatis tersedia di `scripts/verify-evidence.sh`. |
-| **7** | **Restart Container** | RestartPolicy `unless-stopped` | `docker inspect` & uji restart service docker daemon. | **READY FOR VM** | Skrip otomatis tersedia di `scripts/verify-evidence.sh`. |
+| **1** | **Struktur Project & Konfigurasi** | Folder tree, Dockerfile, compose.yaml | Jalankan `scripts/verify-evidence.sh` atau screenshot editor/terminal. | **PASS** | Tersedia di [evidence/01-project-structure/](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/evidence/01-project-structure/). |
+| **2** | **Status Container di Azure VM** | Output `docker compose ps` di VM | Eksekusi `docker compose ps` pada terminal SSH VM `edo-praktikum2`. | **PASS** | Terverifikasi di [evidence/02-container-status/docker_compose_ps.txt](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/evidence/02-container-status/docker_compose_ps.txt) (keduanya Up healthy). |
+| **3** | **Aplikasi via Public IP** | Website terbuka di `http://70.153.150.99` | Buka browser menuju alamat IP publik VM Azure port 80. | **PASS** | Screenshot dashboard live di [evidence/03-public-access/student_task_manager_live.png](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/evidence/03-public-access/student_task_manager_live.png). |
+| **4** | **Halaman Overview Azure** | Screenshot Portal Azure VM | Buka Azure Portal -> VM `edo-praktikum2` (Status Running & Public IP `70.153.150.99`). | **PASS** | Screenshot di [evidence/04-azure-overview/azure_vm_running_overview.png](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/evidence/04-azure-overview/azure_vm_running_overview.png). |
+| **5** | **Persistensi Data** | Data bertahan setelah `docker compose down` | Input tugas `UJI-PERSISTENSI-DOCKER` -> down -> up -d -> data tetap ada. | **PASS** | Teruji via `scripts/verify-evidence.sh` (Task ID #5 bertahan setelah down/up). |
+| **6** | **Keamanan Network Database** | Port 5432 tidak terbuka ke publik/host | Verifikasi `docker compose ps database` dan inspect network internal. | **PASS** | [evidence/06-network-security/network_inspect.json](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/evidence/06-network-security/network_inspect.json) (`Internal: true`, koneksi host ditolak). |
+| **7** | **Restart Container** | RestartPolicy `unless-stopped` | `docker inspect` & verifikasi `unless-stopped`. | **PASS** | [evidence/07-restart-test/restart_policy.json](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/evidence/07-restart-test/restart_policy.json) (`unless-stopped` pada app & db). |
 
 ---
 
 ## Keterangan Status:
-- **PASS:** Persyaratan telah diimplementasikan, divalidasi, dan diuji secara lokal.
-- **READY FOR VM:** Kode dan konfigurasi 100% siap; tinggal dijalankan pada Azure VM oleh pengguna atau asisten saat VM dinyalakan.
+- **PASS:** Persyaratan telah diimplementasikan, divalidasi, dan diuji secara nyata pada runtime Azure VM dan lingkungan lokal (100% PASS).
 - **FAIL:** Persyaratan tidak terpenuhi (0 item).
 - **BLOCKED:** Terhambat masalah teknis (0 item).
+

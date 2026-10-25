@@ -1,0 +1,62 @@
+[
+    {
+        "Name": "student_task_backend",
+        "Id": "7847fe515a87058cf7a95e14839ad4b049b95fcba349365d71465164694fadbb",
+        "Created": "2026-10-25T18:37:34.373834482Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv4": true,
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.21.0.0/16",
+                    "IPRange": "",
+                    "Gateway": "172.21.0.1"
+                }
+            ]
+        },
+        "Internal": true,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Options": {},
+        "Labels": {
+            "com.docker.compose.config-hash": "1f1ed0fcef84d954d19a7916a75f749d3e604353d082c1e5fe3d7b5a2b7a76a9",
+            "com.docker.compose.network": "backend",
+            "com.docker.compose.project": "student-task-manager",
+            "com.docker.compose.version": "2.40.3"
+        },
+        "Containers": {
+            "495318a4b3184d1bdbb2e67e55a2fb10c26ec075541c86cfcf31b082b64598a5": {
+                "Name": "student-task-app",
+                "EndpointID": "f9100d6ed3e161edca44c27426266a970042f40458df8e06b653761b1b6b11fa",
+                "MacAddress": "0a:d8:41:25:24:3d",
+                "IPv4Address": "172.21.0.3/16",
+                "IPv6Address": ""
+            },
+            "804086dafc3e7ebc95045dfd6b7b27d3311799f3dde2ac8fff9499d0f895c2da": {
+                "Name": "student-task-db",
+                "EndpointID": "18d2fbaccfaea8dee453bea03c7df65734be585c9810c3172501dd4e2eaa344e",
+                "MacAddress": "02:b1:53:89:20:e0",
+                "IPv4Address": "172.21.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Status": {
+            "IPAM": {
+                "Subnets": {
+                    "172.21.0.0/16": {
+                        "IPsInUse": 5,
+                        "DynamicIPsAvailable": 65531
+                    }
+                }
+            }
+        }
+    }
+]

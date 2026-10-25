@@ -58,26 +58,35 @@
 
 ---
 
-## 2. Implemented & Awaiting VM Recovery Execution
+## 2. Status Deployment Runtime di Azure VM (`edo-praktikum2`): 100% SUKSES
 
-- **Deployment Runtime ke Azure VM (`edo-praktikum2`):**
-  - Seluruh source code, skrip deployment (`scripts/deploy-azure.sh`), skrip bukti (`scripts/verify-evidence.sh`), dan arsip bersih `student-task-manager.tar.gz` (62.23 KB) telah selesai dan diverifikasi.
-  - Test suite unit (`tests/api.test.js`) 100% PASS (8/8).
-  - Test runner terisolasi (`tests/integration.test.js` pada target `tester`) siap menguji PostgreSQL sungguhan tanpa mock.
-  - Konfigurasi `compose.yaml` tervalidasi 100% via `docker compose config -q`.
+- **Pemulihan Akses VM Berhasil Dilakukan:**
+  - Metode: Stop (Deallocate) lalu Start dieksekusi secara otonom via Browser Automation pada Azure Portal.
+  - Alamat IP Publik: Tetap stabil di `70.153.150.99`.
+  - SSH Client: Berhasil login tanpa hambatan banner exchange menggunakan kunci `id_ed25519`.
+- **Runtime Deployment Berhasil:**
+  - File proyek `student-task-manager.tar.gz` ditransfer via SCP dan diekstrak di `/home/azureuser/Student-Task-Manager`.
+  - Service `portify-app-1` dihentikan sementara secara aman via `docker stop` (volume `portify_mysql_data` 100% aman).
+  - Skrip `./scripts/deploy-azure.sh 70.153.150.99` berhasil dijalankan.
+  - Kontainer `student-task-app` (port 80) dan `student-task-db` (PostgreSQL 16) berstatus **Up (healthy)**.
+- **Pengujian Integrasi Database PostgreSQL Sungguhan (Zero Mocks):**
+  - Dijalankan via test-runner kontainer internal: `docker compose --profile test run --rm test-runner`.
+  - Hasil: **2 tests passed, 0 failed** (Koneksi langsung, inisialisasi skema, dan alur CRUD penuh).
+- **Pengujian Persistensi Data:**
+  - Data uji (#5 `UJI-PERSISTENSI-DOCKER-1792953453`) berhasil bertahan utuh setelah eksekusi `docker compose down` dan `docker compose up -d`.
+- **Keamanan Isolasi Network Database:**
+  - Network `student_task_backend` terverifikasi `Internal: true`.
+  - Port PostgreSQL 5432 tidak dipublikasikan ke host (percobaan koneksi netcat menghasilkan `Connection refused`).
+- **Verifikasi UI Publik:**
+  - Website live di `http://70.153.150.99/` dengan status `Online (PostgreSQL Healthy - 1ms)`.
+  - Seluruh 7 bukti pengujian resmi telah disimpan di direktori `evidence/`.
 
 ---
 
-## 3. Investigasi Masalah Akses Azure VM (`70.153.150.99`)
+## 3. Matriks Kelengkapan Tugas
 
-- **Kondisi Terkini:**
-  - TCP Port 80: HTTP 200 OK (Aplikasi Praktikum 2 Portify / Nginx aktif dan merespons dalam 20ms).
-  - TCP Port 22: Handshake TCP berhasil dalam 20ms, namun server tidak mengirimkan identification banner (`Connection timed out during banner exchange`).
-  - Azure VM Agent: Berstatus *Not Ready*, `Agent Version: Unknown`.
-- **Akar Masalah yang Terbukti:**
-  - Deadlock/hang pada `systemd`/dbus di level guest Ubuntu akibat proses eksekusi RunCommand sebelumnya yang menggantung. Hal ini menyebabkan `ssh.socket` menerima TCP connection tetapi gagal menjalankan worker `ssh@.service`, dan `walinuxagent` tidak dapat mengirim heartbeat ke fabric Azure.
-- **Rencana Tindakan Pemulihan Non-Destruktif:**
-  - Opsi A (Rekomendasi Utama): Melakukan **Stop (Deallocate)** lalu **Start** melalui Azure Portal untuk merestart Hyper-V instance secara bersih tanpa merusak data disk atau database.
-  - Opsi B: Membuka **Serial Console** di Azure Portal (`/dev/ttyS0`) dan merestart service:
-    `sudo systemctl restart ssh` dan `sudo systemctl restart walinuxagent`.
+- **Delapan (8) Ketentuan Wajib:** 8 / 8 **PASS** (100%).
+- **Tujuh (7) Bukti Pengujian:** 7 / 7 **PASS** (100%).
+- **Dokumentasi & Laporan:** 100% Siap.
+
 

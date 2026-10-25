@@ -90,8 +90,8 @@ Eksekusi perintah `docker compose ps` di Azure VM menampilkan kedua container (`
 *(Lampiran Screenshot: `evidence/02-container-status/`)*
 
 ### 6.3 Bukti 3: Akses Aplikasi melalui Public IP
-Aplikasi dapat dibuka dengan lancar pada browser melalui `http://<IP_PUBLIC_VM>` tanpa error 500. Seluruh fungsi antarmuka, metrik ringkasan, dan kartu tugas muncul sempurna.  
-*(Lampiran Screenshot: `evidence/03-public-access/`)*
+Aplikasi dapat dibuka dengan lancar pada browser melalui `http://70.153.150.99` tanpa error 500. Seluruh fungsi antarmuka, metrik ringkasan, indikator kesehatan sistem, dan kartu tugas muncul sempurna.  
+*(Lampiran Screenshot: `evidence/03-public-access/student_task_manager_live.png`)*
 
 ### 6.4 Bukti 4: Halaman Overview Azure Portal
 Halaman Overview pada Azure Portal membuktikan bahwa VM `edo-praktikum2` berstatus `Running` dengan IP publik yang sama persis dengan yang diakses pada Bukti 3.  
