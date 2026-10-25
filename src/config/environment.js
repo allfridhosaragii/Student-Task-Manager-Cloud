@@ -13,7 +13,7 @@ const config = {
     port: parseInt(process.env.DB_PORT || '5432', 10),
     name: process.env.DB_NAME || process.env.POSTGRES_DB || 'student_tasks',
     user: process.env.DB_USER || process.env.POSTGRES_USER || 'taskuser',
-    password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || 'taskpass_cloud_2026',
+    password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || '',
     max: parseInt(process.env.DB_POOL_MAX || '10', 10),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000

@@ -14,7 +14,7 @@ Berdasarkan konfigurasi infrastruktur Praktikum 2 sebelumnya:
 - **Username SSH:** `azureuser`
 - **Kunci Autentikasi:** Pasangan kunci SSH `ed25519` di laptop mahasiswa (`~/.ssh/id_ed25519`)
 - **Port Jaringan Terbuka (NSG):** Port 22 (SSH) dan Port 80 (HTTP).  
-  *Catatan: Port 5432 (PostgreSQL) TIDAK BOLEH dibuka pada NSG.*
+  *Catatan Penting: Port 5432 (PostgreSQL) TIDAK BOLEH dibuka pada NSG demi kepatuhan Ketentuan 3.*
 
 ---
 
@@ -35,94 +35,83 @@ Berdasarkan konfigurasi infrastruktur Praktikum 2 sebelumnya:
 
 ---
 
-## 3. Menghubungkan ke VM Melalui SSH
+## 3. Pengemasan & Pengiriman Kode Program ke VM (Clean Transfer)
 
-Buka PowerShell di laptop Anda dan jalankan perintah:
+Untuk mencegah pengiriman folder `node_modules` (ratusan MB binary Windows yang tidak kompatibel di Linux), riwayat `.git`, maupun file rahasia `.env`, gunakan berkas arsip terkompresi bersih:
 
-```powershell
-ssh -i $HOME\.ssh\id_ed25519 azureuser@<IP_PUBLIC_VM>
-```
+1. **Kemas Proyek di Laptop (PowerShell):**
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File "P:\Semester 5\Komputasi awan\Week 6\Student-Task-Manager\scripts\package-project.ps1"
+   ```
+   *Skrip ini menghasilkan berkas `student-task-manager.tar.gz` (~62 KB) yang telah mengecualikan node_modules, .git, dan .env.*
 
-Ganti `<IP_PUBLIC_VM>` dengan alamat IP publik aktual yang tertera di Azure Portal.
+2. **Kirim Berkas Arsip ke Azure VM:**
+   ```powershell
+   scp -i $HOME\.ssh\id_ed25519 "P:\Semester 5\Komputasi awan\Week 6\Student-Task-Manager\student-task-manager.tar.gz" azureuser@<IP_PUBLIC_VM>:~/
+   ```
 
 ---
 
-## 4. Pengiriman Kode Program ke VM
+## 4. Eksekusi Deployment di Azure VM Melalui SSH
 
-Anda dapat memilih salah satu dari dua metode berikut:
+1. **Masuk ke Sesi SSH VM:**
+   ```powershell
+   ssh -i $HOME\.ssh\id_ed25519 azureuser@<IP_PUBLIC_VM>
+   ```
 
-### Opsi A: Melalui Repository GitHub (Direkomendasikan)
-Jika Anda telah membuat repository GitHub pribadi:
+2. **Ekstrak Berkas Proyek di Direktori Aman:**
+   ```bash
+   mkdir -p ~/Student-Task-Manager
+   tar -xzf ~/student-task-manager.tar.gz -C ~/Student-Task-Manager
+   cd ~/Student-Task-Manager
+   chmod +x scripts/*.sh
+   ```
+
+3. **Jalankan Skrip Deployment Otomatis dengan Parameter IP Publik:**
+   ```bash
+   ./scripts/deploy-azure.sh <IP_PUBLIC_VM>
+   ```
+   *Skrip ini secara otomatis:*
+   - Memvalidasi format IPv4 dari Azure Portal yang Anda masukkan.
+   - Mengonfigurasi `APP_URL=http://<IP_PUBLIC_VM>` pada file `.env` server.
+   - Menghasilkan password database acak 24 karakter yang kuat dan menerapkan izin akses aman `chmod 600 .env`.
+   - Memvalidasi sintaks Docker Compose tanpa menghapus volume atau mereset database lama.
+   - Membangun image dan menyalakan kontainer `app` dan `database`.
+   - Memantau kondisi startup hingga kedua kontainer berstatus `healthy`.
+
+---
+
+## 5. Menjalankan Pengujian Integrasi Database & 7 Bukti Wajib di VM
+
+Jalankan skrip verifikasi otomatis di terminal VM:
+
 ```bash
-git clone https://github.com/<username>/Student-Task-Manager-Cloud.git ~/Student-Task-Manager
-cd ~/Student-Task-Manager
+./scripts/verify-evidence.sh <IP_PUBLIC_VM>
 ```
 
-### Opsi B: Transfer Langsung via SCP dari Windows
-Jalankan perintah ini di PowerShell laptop Anda:
-```powershell
-scp -i $HOME\.ssh\id_ed25519 -r "P:\Semester 5\Komputasi awan\Week 6\Student-Task-Manager" azureuser@<IP_PUBLIC_VM>:~/Student-Task-Manager
-```
+Skrip ini akan mengeksekusi secara nyata:
+1. **Bukti 1:** Memeriksa struktur project, Dockerfile, dan `compose.yaml`.
+2. **Bukti 2:** Memeriksa status `docker compose ps` (kedua service `Up (healthy)`).
+3. **Bukti 3:** Memeriksa konektivitas HTTP port 80 dan endpoint `/health`.
+4. **Bukti 4:** Memberikan panduan pencocokan IP dan status Running pada Azure Portal.
+5. **Uji Integrasi Database Sungguhan (Zero Mock):**  
+   Menjalankan kontainer `test-runner` terisolasi pada internal network `student_task_backend`:
+   ```bash
+   docker compose --profile test run --rm test-runner
+   ```
+   *Pengujian ini mengeksekusi operasi CRUD nyata langsung ke database PostgreSQL tanpa pernah membuka port 5432 ke internet.*
+6. **Bukti 5 (Persistensi Data):**  
+   Menyimpan tugas baru `UJI-PERSISTENSI-DOCKER` -> menghentikan kontainer dengan `docker compose down` (tanpa `-v`) -> menyalakan kembali dengan `docker compose up -d` -> memverifikasi data tugas masih ada.
+7. **Bukti 6 (Keamanan Network):**  
+   Membuktikan `docker compose ps database` tidak memiliki port host, jaringan backend memiliki `"Internal": true`, dan koneksi lokal ke port 5432 ditolak.
+8. **Bukti 7 (Restart Policy):**  
+   Memeriksa `RestartPolicy` bernilai `unless-stopped` pada kedua kontainer.
 
 ---
 
-## 5. Konfigurasi Lingkungan Server (.env)
+## 6. Mengakses Website di Browser Laptop
 
-Di dalam terminal SSH Ubuntu VM:
-
-```bash
-cd ~/Student-Task-Manager
-
-# Buat file .env dari template resmi .env.example
-cp .env.example .env
-
-# Dapatkan IP publik otomatis dan masukkan ke .env
-PUBLIC_IP=$(curl -s -4 ifconfig.me)
-sed -i "s|http://<IP_PUBLIC_VM>|http://${PUBLIC_IP}|g" .env
-
-# (Opsional) Sesuaikan password database jika diperlukan
-nano .env
-```
-
-Pastikan variabel `APP_URL` menggunakan alamat IP publik aktual, misalnya `APP_URL=http://20.xxx.xxx.xxx`.
-
----
-
-## 6. Menjalankan Aplikasi via Docker Compose
-
-1. **Validasi Konfigurasi Compose:**
-   ```bash
-   docker compose config -q
-   ```
-   *Jika tidak muncul output error, konfigurasi dinyatakan valid.*
-
-2. **Build Docker Image & Jalankan Service:**
-   ```bash
-   docker compose up -d --build
-   ```
-
-3. **Periksa Status Kontainer:**
-   ```bash
-   docker compose ps
-   ```
-   Hasil yang diharapkan:
-   - `student-task-app`: Status `Up` (healthy) — Port `0.0.0.0:80->3000/tcp`
-   - `student-task-db`: Status `Up` (healthy) — Port internal `5432/tcp` (tanpa mapping host)
-
-4. **Periksa Log Eksekusi:**
-   ```bash
-   # Log aplikasi
-   docker compose logs --tail=50 app
-
-   # Log database PostgreSQL
-   docker compose logs --tail=50 database
-   ```
-
----
-
-## 7. Pengujian Akses Website
-
-Buka web browser di laptop Anda dan akses alamat:
+Buka web browser dan kunjungi:
 ```text
 http://<IP_PUBLIC_VM>
 ```
@@ -130,11 +119,11 @@ Website **Student Task Manager** akan langsung terbuka dengan indikator sistem o
 
 ---
 
-## 8. Prosedur Penghematan Kredit Azure (PENTING!)
+## 7. Prosedur Penghematan Kredit Azure (PENTING!)
 
-Akun mahasiswa memiliki kredit terbatas (*Azure for Students*). Setelah seluruh pengujian dan pengambilan screenshot laporan selesai:
+Setelah seluruh pengujian dan pengambilan screenshot selesai:
 
-1. Matikan kontainer secara rapi jika diperlukan:
+1. Matikan kontainer secara rapi:
    ```bash
    cd ~/Student-Task-Manager
    docker compose down
@@ -143,4 +132,3 @@ Akun mahasiswa memiliki kredit terbatas (*Azure for Students*). Setelah seluruh 
    - Masuk ke Azure Portal -> VM `edo-praktikum2` -> klik **Stop**.
    - Tunggu hingga status berubah menjadi **Stopped (deallocated)**.
    - Status ini menghentikan pemotongan biaya komputasi per jam pada saldo Azure for Students Anda.
-3. *Catatan:* Nyalakan kembali VM saat asisten praktikum akan melakukan penilaian langsung.

@@ -28,3 +28,7 @@ ehthumbs.db
 
 # Log files
 *.log
+
+# Deployment Archives
+*.tar.gz
+*.zip

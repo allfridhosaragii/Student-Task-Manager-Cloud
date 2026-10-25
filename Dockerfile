@@ -12,7 +12,20 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 # ==============================================================================
-# STAGE 2: Production Runner
+# STAGE 2: Isolated Test Runner
+# Digunakan untuk menjalankan pengujian integrasi database pada internal network
+# ==============================================================================
+FROM deps AS tester
+WORKDIR /app
+COPY --chown=node:node package.json ./
+COPY --chown=node:node src/ ./src/
+COPY --chown=node:node public/ ./public/
+COPY --chown=node:node tests/ ./tests/
+USER node
+CMD ["npm", "run", "test:integration"]
+
+# ==============================================================================
+# STAGE 3: Production Runner (Default Target)
 # Menggunakan base image minimal dan user non-root untuk keamanan kontainer
 # ==============================================================================
 FROM node:20-alpine AS runner

@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: runner
     container_name: student-task-app
     restart: unless-stopped
     ports:
@@ -18,7 +19,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=${DB_NAME:-student_tasks}
       - DB_USER=${DB_USER:-taskuser}
-      - DB_PASSWORD=${DB_PASSWORD:-taskpass_cloud_2026}
+      - DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD_wajib_diatur_pada_file_env}
     networks:
       - frontend
       - backend
@@ -43,7 +44,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-student_tasks}
       POSTGRES_USER: ${DB_USER:-taskuser}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-taskpass_cloud_2026}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD_wajib_diatur_pada_file_env}
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -56,6 +57,33 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  # ============================================================================
+  # SERVICE 3: Isolated Test Runner (Integration Test on Internal Network)
+  # Hanya dijalankan saat dipanggil: docker compose --profile test run --rm test-runner
+  # Memungkinkan pengujian PostgreSQL nyata tanpa membuka port ke host atau internet
+  # ============================================================================
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: tester
+    container_name: student-task-tester
+    profiles:
+      - test
+    environment:
+      - NODE_ENV=test
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_NAME=${DB_NAME:-student_tasks}
+      - DB_USER=${DB_USER:-taskuser}
+      - DB_PASSWORD=${DB_PASSWORD:?DB_PASSWORD_wajib_diatur_pada_file_env}
+    networks:
+      - backend
+    depends_on:
+      database:
+        condition: service_healthy
+    command: ["npm", "run", "test:integration"]
 
 # ==============================================================================
 # NETWORKS: Isolasi Jaringan Aplikasi dan Database
