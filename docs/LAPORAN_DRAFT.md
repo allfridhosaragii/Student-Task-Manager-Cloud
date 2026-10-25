@@ -5,10 +5,10 @@
 ---
 
 ## IDENTITAS MAHASISWA
-- **Nama Mahasiswa:** [Nama Lengkap Mahasiswa]
-- **NIM:** [Nomor Induk Mahasiswa]
-- **Kelas:** [Kelas Praktikum Komputasi Awan]
-- **Program Studi:** Teknik Informatika / Sistem Informasi
+- **Nama Mahasiswa:** Allfridho Prima Anjaynata Saragi
+- **NIM:** 102062400045
+- **Kelas:** Komputasi Awan (Semester 5)
+- **Program Studi:** Rekayasa Perangkat Lunak / Teknik Informatika
 - **Mata Kuliah:** Komputasi Awan (Semester 5)
 - **Tautan Repositori GitHub:** `https://github.com/<username>/Student-Task-Manager-Cloud`
 
