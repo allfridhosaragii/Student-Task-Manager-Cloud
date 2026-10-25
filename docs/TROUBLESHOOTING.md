@@ -88,3 +88,37 @@ Jika Anda ingin mereset seluruh database beserta volumenya (PERHATIAN: menghapus
 docker compose down -v
 docker compose up -d --build
 ```
+
+---
+
+## 6. Kendala SSH Banner Exchange Timeout & Azure VM Agent Not Ready (Systemd / Dbus Deadlock)
+
+### Gejala:
+1. `Test-NetConnection <IP_VM> -Port 22` berhasil (`TcpTestSucceeded: True`).
+2. `ssh -vvv azureuser@<IP_VM>` menampilkan: `Connection established` lalu `Connection timed out during banner exchange`.
+3. Azure Portal menampilkan: `VM Agent Status: Not Ready`, `Agent Version: Unknown`.
+4. Azure Run Command menampilkan: `Eksekusi skrip sedang berlangsung...` tanpa henti.
+5. Port 80 web server (Nginx) tetap merespons HTTP request secara normal.
+
+### Analisis Akar Masalah:
+- Kernel Linux dan TCP stack VM dalam keadaan aktif.
+- Pada Ubuntu 24.04 LTS, OpenSSH menggunakan `ssh.socket` (systemd socket activation). Port 22 menerima koneksi TCP pada level kernel, namun proses worker `sshd` (`ssh@.service`) gagal di-spawn karena dbus/systemd job manager mengalami deadlock atau hang akibat eksekusi background command sebelumnya.
+- `walinuxagent` (Azure Guest Agent) juga terhenti karena gagal berkomunikasi dengan systemd, sehingga fabric Azure menandai VM Agent sebagai *Not Ready*.
+
+### Solusi Pemulihan Aman (Non-Destruktif):
+1. **Opsi 1 (Sangat Disarankan): Stop (Deallocate) & Start via Azure Portal**
+   - Buka Azure Portal -> Virtual Machines -> `edo-praktikum2`.
+   - Klik tombol **Stop** (Status akan berubah menjadi *Stopped (deallocated)*). Hal ini memaksa fabric Hyper-V mematikan hardware VM secara bersih dari luar OS tanpa bergantung pada skrip shutdown systemd yang macet.
+   - Setelah status *Stopped*, klik **Start**.
+   - VM akan boot ulang secara bersih, systemd dan walinuxagent akan aktif normal kembali, dan SSH banner exchange akan berfungsi.
+   - *Catatan:* Periksa kembali Public IP setelah start. Jika IP dinamis berubah, perbarui argumen IP saat deploy.
+2. **Opsi 2: Azure Serial Console (Hypervisor TTY)**
+   - Buka Azure Portal -> `edo-praktikum2` -> menu kiri bagian **Help** -> **Serial Console**.
+   - Tekan Enter pada terminal serial `/dev/ttyS0` dan login dengan akun `azureuser`.
+   - Jalankan pemulihan service:
+     ```bash
+     sudo systemctl restart ssh
+     sudo systemctl restart walinuxagent
+     ```
+   - Periksa status: `systemctl status ssh` dan uji kembali koneksi SSH dari Windows.
+
