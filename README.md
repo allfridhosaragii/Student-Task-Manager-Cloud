@@ -14,14 +14,16 @@
 
 ---
 
-## 2. Tujuan Proyek
-1. Mengimplementasikan kontainerisasi mandiri (*containerization*) pada aplikasi web pribadi.
-2. Membangun image Docker menggunakan `Dockerfile` kustom dengan teknik *multi-stage build*.
-3. Mengorkestrasi minimal dua layanan (*service* `app` dan `database`) melalui `compose.yaml`.
-4. Menerapkan isolasi jaringan internal Docker (`internal: true`) dan penyimpanan data persisten (*named volume*).
-5. Menerapkan mekanisme keandalan sistem: *healthcheck*, *service_healthy dependency*, dan kebijakan *restart* `unless-stopped`.
-6. Melakukan *cloud deployment* ke Microsoft Azure Virtual Machine Ubuntu 24.04 LTS.
-7. Memenuhi seluruh 8 ketentuan wajib dan menyediakan dokumentasi lengkap untuk 7 bukti pengujian praktikum.
+## 2. Delapan (8) Ketentuan Wajib Asprak
+Aplikasi dan infrastruktur ini dirancang dan diimplementasikan untuk memenuhi 8 ketentuan wajib dari asisten praktikum:
+1. **Dockerfile sendiri:** Multi-stage custom Dockerfile berbasis `node:20-alpine` dengan pengguna non-root `node`.
+2. **Compose minimal dua service:** Orkestrasi service `app` (Express.js) dan `database` (PostgreSQL 16) via `compose.yaml`.
+3. **Internal network database:** Database terisolasi pada custom network `student_task_backend` dengan `internal: true`.
+4. **Persistent volume:** Data PostgreSQL tersimpan aman pada named volume `postgres_data`.
+5. **Database healthcheck dan depends_on condition service_healthy:** App menunggu database siap sebelum melayani request.
+6. **Restart unless-stopped pada setiap service utama:** Kebijakan pemulihan mandiri otomatis aktif pada seluruh service.
+7. **Keamanan .env dan .env.example:** Template non-rahasia pada `.env.example`, file `.env` dilindungi dari Git dan Docker image.
+8. **Deployment Azure VM yang dapat diakses melalui IP publik:** Berjalan stabil pada Azure VM `edo-praktikum2` (`http://70.153.150.99`).
 
 ---
 
@@ -186,46 +188,41 @@ docker compose up -d
 ## 8. Panduan Deployment ke Azure Virtual Machine
 
 1. **Nyalakan Virtual Machine:**
-   Buka Azure Portal -> VM `edo-praktikum2` -> klik **Start**. Catat alamat IP Publiknya.
+   Buka Azure Portal -> VM `edo-praktikum2` -> klik **Start**. Catat alamat IP Publiknya (contoh: `70.153.150.99`).
 2. **Koneksi Melalui SSH:**
    ```powershell
-   ssh -i $HOME\.ssh\id_ed25519 azureuser@<IP_PUBLIC_VM>
+   ssh -i $HOME\.ssh\id_ed25519 azureuser@70.153.150.99
    ```
 3. **Kloning Repositori / Salin Kode:**
    ```bash
-   git clone https://github.com/<username>/Student-Task-Manager-Cloud.git ~/Student-Task-Manager
+   git clone https://github.com/allfridhosaragii/Student-Task-Manager-Cloud.git ~/Student-Task-Manager
    cd ~/Student-Task-Manager
    ```
 4. **Jalankan Skrip Deployment Otomatis:**
    ```bash
    chmod +x scripts/*.sh
-   ./scripts/deploy-azure.sh
+   ./scripts/deploy-azure.sh 70.153.150.99
    ```
 5. **Akses Website:**
    Buka browser laptop dan kunjungi:
    ```text
-   http://<IP_PUBLIC_VM>
+   http://70.153.150.99
    ```
 
 ---
 
 ## 9. Prosedur Pembuktian 7 Bukti Wajib Praktikum
 
-Jalankan skrip pembuktian otomatis di VM:
-```bash
-./scripts/verify-evidence.sh
-```
+Seluruh bukti pengujian disimpan pada folder `evidence/`:
+1. **Bukti 1 (Struktur & Config):** `evidence/01-project-structure/` (`project_structure.txt`, `bukti_01_github_project_structure.png`).
+2. **Bukti 2 (Status Container):** `evidence/02-container-status/` (`docker_compose_ps.txt` - kedua kontainer `healthy`).
+3. **Bukti 3 (Akses Public IP):** `evidence/03-public-access/` (`student_task_manager_live.png` - web UI live di port 80).
+4. **Bukti 4 (Overview Azure):** `evidence/04-azure-overview/` (`azure_vm_running_overview.png`, `azure_vm_stopped_deallocated.png`).
+5. **Bukti 5 (Persistensi Data):** `evidence/05-data-persistence/` (`bukti_05_uji_persistensi_data.png`, `persistence_test_log.txt`).
+6. **Bukti 6 (Keamanan Network):** `evidence/06-network-security/` (`network_inspect.json`, `docker_socket_security.txt`).
+7. **Bukti 7 (Restart Policy):** `evidence/07-restart-test/` (`restart_policy.json`, `runtime_crash_restart_proof.txt`).
 
-Atau lakukan verifikasi manual:
-1. **Bukti 1 (Struktur & Config):** Tampilkan `tree`, `cat Dockerfile`, dan `cat compose.yaml`.
-2. **Bukti 2 (Status Container):** `docker compose ps` (kedua kontainer berstatus `healthy`).
-3. **Bukti 3 (Akses Public IP):** Screenshot browser membuka `http://<IP_PUBLIC_VM>`.
-4. **Bukti 4 (Overview Azure):** Screenshot Azure Portal VM `edo-praktikum2` (Status Running & IP sama).
-5. **Bukti 5 (Persistensi Data):** Buat tugas `UJI-PERSISTENSI-DOCKER` -> `docker compose down` -> `docker compose up -d` -> verifikasi tugas masih ada.
-6. **Bukti 6 (Keamanan Network):** `docker compose ps database` (tidak ada published port) dan `nc -z -v 127.0.0.1 5432` (koneksi ditolak).
-7. **Bukti 7 (Restart Policy):** `docker inspect` (RestartPolicy `unless-stopped`) dan `sudo systemctl restart docker` (kontainer otomatis hidup kembali).
-
-Rincian panduan screenshot tersedia di [docs/TESTING_GUIDE.md](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/docs/TESTING_GUIDE.md).
+Rincian panduan dan penjelasan teknis tersedia di [docs/TESTING_GUIDE.md](file:///P:/Semester%205/Komputasi%20awan/Week%206/Student-Task-Manager/docs/TESTING_GUIDE.md).
 
 ---
 

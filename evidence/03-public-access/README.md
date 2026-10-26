@@ -1,18 +1,16 @@
-# BUKTI 3: APLIKASI MELALUI PUBLIC IP
+# BUKTI 3: AKSES APLIKASI MELALUI PUBLIC IP AZURE VM
 
-## 1. Perintah / Tindakan Pengambilan Bukti
-Buka browser (Google Chrome, Microsoft Edge, dll.) dan kunjungi:
-```text
-http://<IP_PUBLIC_VM>
-```
-*(Contoh: `http://20.198.xxx.xxx`)*
+## 1. Deskripsi Bukti
+Bukti ini menunjukkan antarmuka web Student Task Manager yang dapat diakses secara publik melalui internet menggunakan IP Publik Azure Virtual Machine (`70.153.150.99`) pada port standar HTTP (80).
 
-## 2. Kondisi yang Wajib Terlihat dalam Screenshot
-- Browser address bar terlihat jelas memuat URL IP publik Azure VM.
-- Halaman web **Student Task Manager** terbuka penuh tanpa connection refused atau error 500.
-- Indikator status sistem hijau: `Online (PostgreSQL Healthy)`.
-- Metrik dashboard statistik dan kartu tugas kuliah terender dengan rapi.
+## 2. Berkas Bukti yang Tersedia di Folder Ini
+- **`student_task_manager_live.png`**: Tangkapan layar browser layar penuh beresolusi tinggi yang mengakses `http://70.153.150.99/` secara langsung.
 
-## 3. Status Bukti
-- **Status:** MENUNGGU EKSEKUSI DI AZURE VM (Dijalankan saat VM dinyalakan oleh pengguna).
-- **Target File Screenshot:** `evidence/03-public-access/bukti_03_akses_public_ip.png`
+## 3. Kondisi yang Tervalidasi dalam Screenshot
+- **URL Akses**: `http://70.153.150.99/` terbuka di browser tanpa pesan error koneksi (*connection refused*) atau error 500.
+- **Indikator Sistem**: Menampilkan status hijau `Online (PostgreSQL Healthy - 1ms)`, membuktikan komunikasi antar-kontainer melalui jaringan internal `student_task_backend` berjalan dengan latensi rendah.
+- **Dashboard Statistik**: Metrik Total Tugas (5), Menunggu (2), Sedang Dikerjakan (2), dan Selesai (1) terisi secara dinamis dari database PostgreSQL.
+- **Daftar Tugas Akademik**: Kartu-kartu penugasan kuliah ditampilkan dengan tingkat prioritas dan deadline yang sesuai.
+
+## 4. Status Bukti
+- **Status:** TERVERIFIKASI & LENGKAP (Tangkapan layar browser aktual tersedia).

@@ -1,25 +1,23 @@
-# BUKTI 6: KEAMANAN NETWORK DATABASE
+# BUKTI 6: KEAMANAN NETWORK DATABASE DAN HARDENING DOCKER SOCKET
 
-## 1. Perintah Pengambilan Bukti
-Jalankan di terminal SSH Azure VM:
-```bash
-cd ~/Student-Task-Manager
+## 1. Deskripsi Bukti
+Bukti ini memverifikasi dua aspek keamanan kritis:
+1. **Isolasi Jaringan Database**: Layanan basis data PostgreSQL (`student-task-db`) berjalan pada jaringan kustom dengan atribut `internal: true`, tanpa membuka port ke host VM maupun internet.
+2. **Hardening Docker Socket**: Socket daemon Docker (`/var/run/docker.sock`) dilindungi dengan hak akses `root:docker` (660), mencegah akses *world-writable* dari pengguna tidak berwenang.
 
-# 1. Periksa published port database
-docker compose ps database
+## 2. Berkas Bukti yang Tersedia di Folder Ini
+1. **`network_inspect.json`**: Hasil inspeksi JSON Docker Network `student_task_backend` yang membuktikan atribut `"Internal": true`.
+2. **`docker_socket_security.txt`**: Catatan audit dan verifikasi perbaikan izin socket Docker dari 666 menjadi 660 (`srw-rw---- 1 root docker`) dan keanggotaan grup `azureuser` pada grup `docker`.
 
-# 2. Periksa atribut internal pada network backend
-docker network inspect student_task_backend | grep -E "Internal|Name"
+## 3. Hasil Pengujian Aktual
+- **Inspeksi Port Database**:
+  `docker compose ps database` hanya menampilkan `5432/tcp` internal tanpa pemetaan ke host (`0.0.0.0:5432`).
+- **Uji Penolakan Koneksi Host**:
+  Percobaan koneksi `nc -z -v 127.0.0.1 5432` dari terminal host menghasilkan pesan:
+  `Connection refused` (Aman, koneksi langsung ditolak).
+- **Integritas Docker Socket**:
+  Hak akses diverifikasi `660` dan dieksekusi langsung oleh `azureuser` tanpa `sudo`.
 
-# 3. Uji koneksi dari host ke port 5432 (harus ditolak/connection refused)
-nc -z -v -w 2 127.0.0.1 5432 2>&1 || echo "Koneksi ke port 5432 ditolak (Aman)"
-```
-
-## 2. Kondisi yang Wajib Terlihat dalam Screenshot
-- Baris database pada `docker compose ps` HANYA menampilkan port `5432/tcp` internal tanpa ada pemetaan `0.0.0.0:5432->5432`.
-- Atribut `"Internal": true` pada inspeksi jaringan Docker backend.
-- Pesan koneksi ditolak (*connection refused*) saat mencoba menghubungi port 5432 dari luar container.
-
-## 3. Status Bukti
-- **Status:** MENUNGGU EKSEKUSI DI AZURE VM (Dijalankan saat VM dinyalakan oleh pengguna).
-- **Target File Screenshot:** `evidence/06-network-security/bukti_06_keamanan_network_database.png`
+## 4. Status Bukti
+- **Status:** TERVERIFIKASI RUNTIME (Inspect JSON dan log audit keamanan socket tersedia).
+- *Catatan:* Tangkapan layar grafis jendela terminal SSH dapat diambil tambahan saat sesi demonstrasi langsung kepada asisten praktikum dengan menyalakan VM kembali.

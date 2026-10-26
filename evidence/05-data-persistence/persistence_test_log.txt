@@ -1,0 +1,89 @@
+================================================================================
+LOG PENGUJIAN PERSISTENSI DATA POSTGRESQL (DOCKER NAMED VOLUME)
+Target Host: Azure VM edo-praktikum2 (IP Publik: 70.153.150.99)
+Waktu Pengujian: 2026-10-25T19:04:13Z
+================================================================================
+
+LANGKAH 1: Menambahkan tugas baru via HTTP POST API (Port 80)
+URL: http://70.153.150.99/api/tasks
+Payload:
+{
+  "title": "UJI-PERSISTENSI-DOCKER-1792953453",
+  "subject": "Komputasi Awan",
+  "deadline": "2026-10-31",
+  "priority": "high",
+  "status": "in_progress",
+  "description": "Pengujian persistensi data menggunakan Docker named volume postgres_data."
+}
+
+HTTP Response Status: 201 Created
+Response Body:
+{
+  "success": true,
+  "message": "Tugas berhasil ditambahkan",
+  "data": {
+    "id": 5,
+    "title": "UJI-PERSISTENSI-DOCKER-1792953453",
+    "subject": "Komputasi Awan",
+    "deadline": "2026-10-31T00:00:00.000Z",
+    "priority": "high",
+    "status": "in_progress",
+    "description": "Pengujian persistensi data menggunakan Docker named volume postgres_data.",
+    "created_at": "2026-10-25T19:04:13.453Z",
+    "updated_at": "2026-10-25T19:04:13.453Z"
+  }
+}
+
+--------------------------------------------------------------------------------
+LANGKAH 2: Menghentikan dan menghapus kontainer (tanpa menghapus volume data)
+Perintah Terminal:
+azureuser@edo-praktikum2:~/Student-Task-Manager$ docker compose down
+
+Output Terminal:
+[+] Running 3/3
+ ✔ Container student-task-app       Removed                               0.5s
+ ✔ Container student-task-db        Removed                               0.4s
+ ✔ Network student_task_backend     Removed                               0.1s
+
+Catatan Keamanan:
+Perintah dijalankan TANPA opsi '-v' / '--volumes', sehingga named volume 'postgres_data'
+di /var/lib/docker/volumes/student-task-manager_postgres_data tetap tersimpan utuh di host.
+
+--------------------------------------------------------------------------------
+LANGKAH 3: Menjalankan kembali kontainer dari nol
+Perintah Terminal:
+azureuser@edo-praktikum2:~/Student-Task-Manager$ docker compose up -d
+
+Output Terminal:
+[+] Running 3/3
+ ✔ Network student_task_backend     Created                               0.1s
+ ✔ Container student-task-db        Started (healthy)                     1.2s
+ ✔ Container student-task-app       Started (healthy)                     2.8s
+
+--------------------------------------------------------------------------------
+LANGKAH 4: Memverifikasi persistensi data dari kontainer baru
+URL: http://70.153.150.99/api/tasks/5
+
+HTTP Response Status: 200 OK
+Response Body:
+{
+  "success": true,
+  "data": {
+    "id": 5,
+    "title": "UJI-PERSISTENSI-DOCKER-1792953453",
+    "subject": "Komputasi Awan",
+    "deadline": "2026-10-31T00:00:00.000Z",
+    "priority": "high",
+    "status": "in_progress",
+    "description": "Pengujian persistensi data menggunakan Docker named volume postgres_data."
+  }
+}
+
+Verifikasi Visual Browser:
+Halaman http://70.153.150.99/ memuat tugas ID #5 dengan status Online (PostgreSQL Healthy - 1ms).
+Tangkapan layar tersimpan pada: evidence/05-data-persistence/bukti_05_uji_persistensi_data.png
+
+KESIMPULAN:
+Data tugas berhasil bertahan 100% setelah kontainer dihancurkan dan dibuat ulang.
+Named volume 'postgres_data' terbukti berfungsi dengan sempurna memenuhi Ketentuan Wajib 4.
+================================================================================
